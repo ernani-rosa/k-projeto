@@ -1,0 +1,88 @@
+#Criando projeto de kubernetes
+#Preciso de 2 tipos de pods com contêineres:
+#1 - backend, com um servidor web (usarei apache)
+#2 - banco de dados, com mysql
+#Precisarei de 2 serviços para utilizar estes pods:
+#1 - Serviço para expor o backend para acesso, usarei um LoadBalancer
+#2 - Serviço para conexão dos pods de backend com o banco de dados.
+#Além disso, é necessário um volume persistente.
+#Primeiramente usarei um volume local, já que o projeto será executado no Minikube.
+
+# Primeiro, vou criar um PV + PVC para o banco 
+
+api: v1
+kind: PersistentVolume
+metadata:
+  name: local-pv
+  labels:
+    name: local-pv
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 50Mi
+  accessModes:
+    - ReadWriteOnce
+  hostpath:
+    path /meubanco/
+---
+api: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: local-pvc
+  labels:
+    name: local-pvc
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Mi
+---
+# Criados os volumes, preciso criar o arquivo de configuração para o pod de apache. A principio, eu não precisaria de uma imagem personalizada, podendo passar as variáveis de ambiente pelo arquivo de configuração do k8s, mas como o exercício sugeriu a criação de uma imagem customizada, eu o farei. 
+# Eu iria criar apenas um Pod, mas pensando melhor, criarei um Deployment com um único Pod. O motivo para isto é que com um Deployment eu tenho um ReplicaSet que será gerenciado, automaticamente lidando com imprevistos e executando novamente o Pod em caso de falhas.
+
+api: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment
+spec:
+  selector:
+    matchlabels:
+      app: mysql-app
+  template:
+    metadata:
+      labels:
+        app: mysql-app
+    spec:
+      containers:
+      - image: ernanirosa/mysql-bck1
+        name: mysql-pod
+        ports:
+        - containerPort: 3306
+        volumeMounts: 
+        - name: local-pvc
+          mountPath: /var/lib/mysql
+
+# Após a criação do deployment para o mysql, criarei um deployment para os pods de apache.
+
+api: apps/v1
+kind: Deployment
+metadata:
+  name: php-deployment
+spec:
+  replicas: 6
+  selector:
+    matchLabels:
+      app: php-app
+  template:
+    metadata:
+      labels:
+        app: php-app
+    spec:
+      containers:
+      - name: php-pod
+        image: ernanirosa/php-bck1
+        ports:
+        - containerPort: 80
+
