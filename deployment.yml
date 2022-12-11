@@ -22,8 +22,8 @@ spec:
     storage: 50Mi
   accessModes:
     - ReadWriteOnce
-  hostpath:
-    path /meubanco/
+  hostPath:
+    path: /meubanco/
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -34,7 +34,7 @@ metadata:
 spec:
   storageClassName: manual
   accessModes:
-    - ReadWriteOnce
+  - ReadWriteOnce
   resources:
     requests:
       storage: 50Mi
@@ -56,7 +56,7 @@ spec:
         app: mysql-app
     spec:
       containers:
-        - image: ernanirosa/mysql-bck1:1.1
+      - image: ernanirosa/mysql-bck1:1.1
         name: mysql-pod
         ports:
         - containerPort: 3306
