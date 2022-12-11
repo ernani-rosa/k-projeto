@@ -1,0 +1,25 @@
+# Criação de serviço para conexão do banco de dados
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-connection
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql-app
+  clusterIP: None
+
+# Agora criarei o LoadBalancer
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-lb
+spec:
+  selector:
+    app: php-app
+  ports:
+  - port: 80
+    targetPort: 80
+  type: LoadBalancer
