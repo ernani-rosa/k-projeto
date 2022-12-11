@@ -11,7 +11,7 @@ spec:
   clusterIP: None
 
 # Agora criarei o LoadBalancer
-
+---
 apiVersion: v1
 kind: Service
 metadata:

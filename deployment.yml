@@ -48,7 +48,7 @@ metadata:
   name: mysql-deployment
 spec:
   selector:
-    matchlabels:
+    matchLabels:
       app: mysql-app
   template:
     metadata:
@@ -57,12 +57,16 @@ spec:
     spec:
       containers:
       - image: ernanirosa/mysql-bck1:1.1
-        name: mysql-pod
+        name: mysql-app
         ports:
         - containerPort: 3306
         volumeMounts: 
         - name: local-pvc
           mountPath: /var/lib/mysql
+      volumes:
+      - name: local-pvc
+        persistentVolumeClaim:
+          claimName: local-pvc
 
 # Após a criação do deployment para o mysql, criarei um deployment para os pods de apache.
 ---
@@ -71,7 +75,7 @@ kind: Deployment
 metadata:
   name: php-deployment
 spec:
-  replicas: 6
+  replicas: 1
   selector:
     matchLabels:
       app: php-app
@@ -82,7 +86,7 @@ spec:
     spec:
       containers:
       - name: php-pod
-        image: ernanirosa/php-bck1:1.0
+        image: ernanirosa/php-bck1:1.1
         ports:
         - containerPort: 80
 
